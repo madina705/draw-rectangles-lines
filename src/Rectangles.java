@@ -5,98 +5,85 @@ import java.awt.event.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Line2D;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class Rectangles extends JPanel implements ActionListener {
 
-    protected BufferedImage canvas = new BufferedImage(500, 400,
-            BufferedImage.TYPE_INT_ARGB);
+    private JRadioButton rectangle, line;
+    private ButtonGroup group;
+    private int action;
 
-    JRadioButton rec,line;
-    ButtonGroup group;
-    int action;
+    private MouseHandler mouseHandler = new MouseHandler();
 
-    boolean lineEnabled= false;
-    MouseHandler mouseHandler = new MouseHandler();
-
-    Point p1 = new Point(0, 0);
-    Point p2 = new Point(0, 0);
+    private Point p1 = new Point(0, 0);
+    private Point p2 = new Point(0, 0);
 
     ArrayList<Rectangle> rect = new ArrayList<>();
     ArrayList<Line2D.Double> lines = new ArrayList<>();
 
-
-    Rectangles(){
+    Rectangles() {
         this.setPreferredSize(new Dimension(500, 400));
         this.addMouseListener(mouseHandler);
 
-        rec=new JRadioButton("Rectangle");
-        rec.addActionListener(this);
-        rec.setBounds(50,50,100,30);
-        add(rec);
+        rectangle = new JRadioButton("Rectangle");
+        rectangle.addActionListener(this);
+        rectangle.setBounds(50, 50, 100, 30);
+        add(rectangle);
 
-        line=new JRadioButton("Line");
+        line = new JRadioButton("Line");
         line.addActionListener(this);
-        line.setBounds(50,100,100,30);
+        line.setBounds(50, 100, 100, 30);
         add(line);
 
-        group=new ButtonGroup();
-        group.add(rec);
+        group = new ButtonGroup();
+        group.add(rectangle);
         group.add(line);
     }
 
 
-    public  void actionPerformed(ActionEvent ae)
-    {
-        String str=ae.getActionCommand();
+    public void actionPerformed(ActionEvent ae) {
+        String str = ae.getActionCommand();
 
-        if(str=="Rectangle")
-            action=1;
+        if (str == "Rectangle")
+            action = 1;
 
-        if(str=="Line")
-            action=2;
+        if (str == "Line")
+            action = 2;
     }
 
-    public void paintComponent(Graphics graphics)
-    {
+    public void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
 
-        if(action==1)
-        {   if(rect.size() != 0){
-            for(int i = 0; i < rect.size(); i++) {
-                graphics.drawRect((int) rect.get(i).getX(), (int) rect.get(i).getY(), 50, 50);
-            }}
-            if(lines.size() != 0){
-                for ( Line2D.Double line : lines)
-                {
-                    graphics.drawLine ( (int)line.getX1(), (int)line.getY1(),(int)line.getX2(), (int)line.getY2());
+        if (action == 1) {
+            if (rect.size() != 0) {
+                for (int i = 0; i < rect.size(); i++) {
+                    graphics.drawRect((int) rect.get(i).getX(), (int) rect.get(i).getY(), 50, 50);
+                    for (Line2D.Double line : lines) {
+                        graphics.drawLine((int) line.getX1(), (int) line.getY1(), (int) line.getX2(), (int) line.getY2());
+                    }
                 }
             }
         }
-        if(action==2 && rect.size() != 0)
-        {
-            if(rect.size() != 0){
-                for(int i = 0; i < rect.size(); i++) {
-                    graphics.drawRect((int) rect.get(i).getX(), (int) rect.get(i).getY(), 50, 50);
-                }}
-            if(lines.size() != 0){
-                for ( Line2D.Double line : lines)
-                {
-                    graphics.drawLine ( (int)line.getX1(), (int)line.getY1(),(int)line.getX2(), (int)line.getY2());
-                }
+        if (action == 2 && rect.size() != 0) {
+            for (Rectangle value : rect) {
+                graphics.drawRect((int) value.getX(), (int) value.getY(), 50, 50);
+            }
+        }
+        if (lines.size() != 0) {
+            for (Line2D.Double line : lines) {
+                graphics.drawLine((int) line.getX1(), (int) line.getY1(), (int) line.getX2(), (int) line.getY2());
             }
         }
     }
 
-    public static void main(String[] args) {
-        JFrame f = new JFrame("Rectangles and Line");
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setSize(500,500);
-        f.setLocationRelativeTo(null);
-        f.add(new Rectangles());
-        f.pack();
-        f.setVisible(true);
+    public Rectangle findRectangle(double x, double y) {
+        Rectangle result = null;
+        for (Rectangle rec : rect) {
+            if (x >= (int) rec.getMinX() && x <= rec.getMaxX() && y >= rec.getMinY() && y <= rec.getMaxY()) {
+                result = rec;
+            }
+        }
+        return result;
     }
 
 
@@ -107,49 +94,39 @@ public class Rectangles extends JPanel implements ActionListener {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if(action==1) {
+            if (action == 1) {
                 p1 = e.getPoint();
                 p2 = p1;
-                rect.add(new Rectangle(p1.x, p1.y, 50,50));
+                rect.add(new Rectangle(p1.x, p1.y, 50, 50));
             }
             repaint();
-            if(action==2) {
-                   if(!twoPoints){
-                        nextPoint = e.getPoint();
-                        twoPoints = true;
-                    }
-                    else{
-                        //Set previous to next from now on.
-                        previousPoint = nextPoint;
+            if (action == 2) {
+                if (!twoPoints) {
+                    nextPoint = e.getPoint();
+                    twoPoints = true;
+                } else {
+                    //Set previous to next from now on.
+                    previousPoint = nextPoint;
 
-                        //Get a new next point.
-                        nextPoint = e.getPoint();
+                    //Get a new next point.
+                    nextPoint = e.getPoint();
 
-                        //Helper method will draw the line each time.
-                       Rectangle rectangle1 = findRectangle(previousPoint.getX(), previousPoint.getY());
-                       Rectangle rectangle2 = findRectangle(previousPoint.getX(), previousPoint.getY());
-                       if(rectangle1 != null && rectangle2 != null) {
-                           lines.add(new Line2D.Double(previousPoint, nextPoint));
-                           repaint();
-                           twoPoints = false;
-                       }
-
+                    //Helper method will draw the line each time.
+                    Rectangle rectangle1 = findRectangle(previousPoint.getX(), previousPoint.getY());
+                    Rectangle rectangle2 = findRectangle(nextPoint.getX(), nextPoint.getY());
+                    if (rectangle1 != null && rectangle2 != null && rectangle1 != rectangle2) {
+                        Point centerRec1 = new Point((int)rectangle1.getCenterX(), (int)rectangle1.getCenterY());
+                        Point centerRec2 = new Point((int)rectangle2.getCenterX(), (int)rectangle2.getCenterY());
+                        lines.add(new Line2D.Double(centerRec1, centerRec2));
+                        repaint();
+                        twoPoints = false;
                     }
 
                 }
+
             }
         }
-
-        public Rectangle findRectangle(double x, double y){
-            Rectangle result = null;
-            for(Rectangle rec: rect){
-                if ( x >= (int)rec.getMinX() && x <= rec.getMaxX() && y >= rec.getMinY() && y <= rec.getMaxY()){
-                    result = rec;
-                }
-            }
-            return result;
-        }
-
+    }
 }
 
 
