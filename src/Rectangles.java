@@ -9,33 +9,27 @@ import java.util.ArrayList;
 
 public class Rectangles extends JPanel implements ActionListener {
 
-    private JRadioButton rectangle, line;
-    private ButtonGroup group;
     private int action;
 
-    private MouseHandler mouseHandler = new MouseHandler();
-
-    private Point p1 = new Point(0, 0);
-    private Point p2 = new Point(0, 0);
-
-    ArrayList<Rectangle> rect = new ArrayList<>();
+    ArrayList<Rectangle> rectangles = new ArrayList<>();
     ArrayList<Line2D.Double> lines = new ArrayList<>();
 
     Rectangles() {
         this.setPreferredSize(new Dimension(500, 400));
+        MouseHandler mouseHandler = new MouseHandler();
         this.addMouseListener(mouseHandler);
 
-        rectangle = new JRadioButton("Rectangle");
+        JRadioButton rectangle = new JRadioButton("Rectangle");
         rectangle.addActionListener(this);
         rectangle.setBounds(50, 50, 100, 30);
         add(rectangle);
 
-        line = new JRadioButton("Line");
+        JRadioButton line = new JRadioButton("Line");
         line.addActionListener(this);
         line.setBounds(50, 100, 100, 30);
         add(line);
 
-        group = new ButtonGroup();
+        ButtonGroup group = new ButtonGroup();
         group.add(rectangle);
         group.add(line);
     }
@@ -43,29 +37,21 @@ public class Rectangles extends JPanel implements ActionListener {
 
     public void actionPerformed(ActionEvent ae) {
         String str = ae.getActionCommand();
-
-        if (str == "Rectangle")
+        if (str.equals("Rectangle"))
             action = 1;
-
-        if (str == "Line")
+        if (str.equals("Line"))
             action = 2;
     }
 
     public void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
-
-        if (action == 1) {
-            if (rect.size() != 0) {
-                for (int i = 0; i < rect.size(); i++) {
-                    graphics.drawRect((int) rect.get(i).getX(), (int) rect.get(i).getY(), 50, 50);
-                    for (Line2D.Double line : lines) {
-                        graphics.drawLine((int) line.getX1(), (int) line.getY1(), (int) line.getX2(), (int) line.getY2());
-                    }
-                }
+        if (action == 1 && rectangles.size() != 0) {
+            for (Rectangle rectangle : rectangles) {
+                graphics.drawRect((int) rectangle.getX(), (int) rectangle.getY(), 50, 50);
             }
         }
-        if (action == 2 && rect.size() != 0) {
-            for (Rectangle value : rect) {
+        if (action == 2 && rectangles.size() != 0) {
+            for (Rectangle value : rectangles) {
                 graphics.drawRect((int) value.getX(), (int) value.getY(), 50, 50);
             }
         }
@@ -86,7 +72,6 @@ public class Rectangles extends JPanel implements ActionListener {
         return result;
     }
 
-
     private class MouseHandler extends MouseAdapter {
 
         boolean twoPoints = false;
@@ -94,10 +79,12 @@ public class Rectangles extends JPanel implements ActionListener {
 
         @Override
         public void mouseClicked(MouseEvent e) {
+            Point p1 = new Point(0, 0);
+            Point p2 = new Point(0, 0);
             if (action == 1) {
                 p1 = e.getPoint();
                 p2 = p1;
-                rect.add(new Rectangle(p1.x, p1.y, 50, 50));
+                rectangles.add(new Rectangle(p1.x, p1.y, 50, 50));
             }
             repaint();
             if (action == 2) {
@@ -127,6 +114,8 @@ public class Rectangles extends JPanel implements ActionListener {
             }
         }
     }
+
+
 }
 
 
