@@ -19,19 +19,19 @@ public class Rectangles extends JPanel implements ActionListener {
         MouseHandler mouseHandler = new MouseHandler();
         this.addMouseListener(mouseHandler);
 
-        JRadioButton rectangle = new JRadioButton("Rectangle");
-        rectangle.addActionListener(this);
-        rectangle.setBounds(50, 50, 100, 30);
-        add(rectangle);
+        JRadioButton rectangleButton = new JRadioButton("Rectangle");
+        rectangleButton.addActionListener(this);
+        rectangleButton.setBounds(50, 50, 100, 30);
+        add(rectangleButton);
 
-        JRadioButton line = new JRadioButton("Line");
-        line.addActionListener(this);
-        line.setBounds(50, 100, 100, 30);
-        add(line);
+        JRadioButton lineButton = new JRadioButton("Line");
+        lineButton.addActionListener(this);
+        lineButton.setBounds(50, 100, 100, 30);
+        add(lineButton);
 
         ButtonGroup group = new ButtonGroup();
-        group.add(rectangle);
-        group.add(line);
+        group.add(rectangleButton);
+        group.add(lineButton);
     }
 
 
@@ -64,9 +64,9 @@ public class Rectangles extends JPanel implements ActionListener {
 
     public Rectangle findRectangle(double x, double y) {
         Rectangle result = null;
-        for (Rectangle rec : rect) {
-            if (x >= (int) rec.getMinX() && x <= rec.getMaxX() && y >= rec.getMinY() && y <= rec.getMaxY()) {
-                result = rec;
+        for (Rectangle rect : rectangles) {
+            if (x >= (int) rect.getMinX() && x <= rect.getMaxX() && y >= rect.getMinY() && y <= rect.getMaxY()) {
+                result = rect;
             }
         }
         return result;
@@ -79,12 +79,10 @@ public class Rectangles extends JPanel implements ActionListener {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            Point p1 = new Point(0, 0);
-            Point p2 = new Point(0, 0);
+            Point p;
             if (action == 1) {
-                p1 = e.getPoint();
-                p2 = p1;
-                rectangles.add(new Rectangle(p1.x, p1.y, 50, 50));
+                p = e.getPoint();
+                rectangles.add(new Rectangle(p.x, p.y, 50, 50));
             }
             repaint();
             if (action == 2) {
@@ -97,8 +95,7 @@ public class Rectangles extends JPanel implements ActionListener {
 
                     //Get a new next point.
                     nextPoint = e.getPoint();
-
-                    //Helper method will draw the line each time.
+                    
                     Rectangle rectangle1 = findRectangle(previousPoint.getX(), previousPoint.getY());
                     Rectangle rectangle2 = findRectangle(nextPoint.getX(), nextPoint.getY());
                     if (rectangle1 != null && rectangle2 != null && rectangle1 != rectangle2) {
@@ -114,7 +111,6 @@ public class Rectangles extends JPanel implements ActionListener {
             }
         }
     }
-
 
 }
 
