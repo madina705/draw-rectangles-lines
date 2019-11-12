@@ -11,9 +11,7 @@ public class Rectangles extends JPanel implements ActionListener {
 
     private int action;
 
-    ArrayList<Rectangle> rectangles = new ArrayList<>();
-    ArrayList<Rectangle> comments = new ArrayList<>();
-    ArrayList<Rectangle> commentsAndRectangles = null;
+    ArrayList<CustomRectangle> rectangles = new ArrayList<>();
     ArrayList<Line2D.Double> lines = new ArrayList<>();
     ArrayList<Text> texts = new ArrayList<>();
     JRadioButton rectangleButton = new JRadioButton("Rectangle");
@@ -78,17 +76,10 @@ public class Rectangles extends JPanel implements ActionListener {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
         if (rectangles.size() != 0) {
-            for (Rectangle rectangle : rectangles) {
-                int x = (int) rectangle.getX();
-                int y = (int) rectangle.getY();
-                graphics.drawRect(x, y, 80, 50);
-            }
-        }
-        if (comments.size() != 0) {
-            for (Rectangle comment : comments) {
-                g2.setStroke(dashed);
-                int x = (int) comment.getX();
-                int y = (int) comment.getY();
+            for (CustomRectangle rectangle : rectangles) {
+                if(rectangle.isComment())  g2.setStroke(dashed);
+                int x = (int) rectangle.getRectangle().getX();
+                int y = (int) rectangle.getRectangle().getY();
                 graphics.drawRect(x, y, 80, 50);
             }
         }
@@ -107,22 +98,10 @@ public class Rectangles extends JPanel implements ActionListener {
         }
     }
 
-    private Rectangle findRectangle(double x, double y) {
-        Rectangle result = null;
-        for (Rectangle rect : rectangles) {
-            if (x >= (int) rect.getMinX() && x <= rect.getMaxX() && y >= rect.getMinY() && y <= rect.getMaxY()) {
-                result = rect;
-            }
-        }
-        return result;
-    }
-
-    private Rectangle getRectangle(double x, double y) {
-        Rectangle result = null;
-        commentsAndRectangles = new ArrayList<>(rectangles);
-        commentsAndRectangles.addAll(comments);
-        for (Rectangle rect : commentsAndRectangles) {
-            if (x >= (int) rect.getMinX() && x <= rect.getMaxX() && y >= rect.getMinY() && y <= rect.getMaxY()) {
+    private CustomRectangle findRectangle(double x, double y) {
+        CustomRectangle result = null;
+        for (CustomRectangle rect : rectangles) {
+            if (x >= (int) rect.getRectangle().getMinX() && x <= rect.getRectangle().getMaxX() && y >= rect.getRectangle().getMinY() && y <= rect.getRectangle().getMaxY()) {
                 result = rect;
             }
         }
@@ -139,12 +118,11 @@ public class Rectangles extends JPanel implements ActionListener {
             Point p;
             if (action == 1) {
                 p = e.getPoint();
-                rectangles.add(new Rectangle(p.x, p.y, 50, 50));
-                if (rectangles.size() > 1) lineButton.setEnabled(true);
+                rectangles.add(new CustomRectangle(new Rectangle(p.x, p.y, 50, 50), false));
             }
             if (action == 3) {
                 p = e.getPoint();
-                comments.add(new Rectangle(p.x, p.y, 50, 50));
+                rectangles.add(new CustomRectangle(new Rectangle(p.x, p.y, 50, 50), true));
             }
             if (action == 4 && !textField.getText().equals("")) {
                 p = e.getPoint();
@@ -161,19 +139,21 @@ public class Rectangles extends JPanel implements ActionListener {
                     //Get a new next point.
                     nextPoint = e.getPoint();
 
-                    Rectangle rectangle1 = getRectangle(previousPoint.getX(), previousPoint.getY());
-                    Rectangle rectangle2 = getRectangle(nextPoint.getX(), nextPoint.getY());
-                    if (rectangle1 != null && rectangle2 != null && rectangle1 != rectangle2) {
-                        Point centerRec1 = new Point((int) rectangle1.getCenterX(), (int) rectangle1.getCenterY());
-                        Point centerRec2 = new Point((int) rectangle2.getCenterX(), (int) rectangle2.getCenterY());
-                        lines.add(new Line2D.Double(centerRec1, centerRec2));
-                        repaint();
-                        twoPoints = false;
+                    CustomRectangle rectangle1 = findRectangle(previousPoint.getX(), previousPoint.getY());
+                    CustomRectangle rectangle2 = findRectangle(nextPoint.getX(), nextPoint.getY());
+                    if(rectangle1 != null && rectangle2 != null && rectangle1 != rectangle2){
+                        if((rectangle1.isComment() && !rectangle2.isComment()) || (rectangle2.isComment() && !rectangle1.isComment() )|| (!rectangle1.isComment() && !rectangle2.isComment() )){
+                            Point centerRec1 = new Point((int) rectangle1.getRectangle().getCenterX(), (int) rectangle1.getRectangle().getCenterY());
+                            Point centerRec2 = new Point((int) rectangle2.getRectangle().getCenterX(), (int) rectangle2.getRectangle().getCenterY());
+                            lines.add(new Line2D.Double(centerRec1, centerRec2));
+                            repaint();
+                            twoPoints = false;
+                        }
                     }
-
                 }
 
             }
+            if (rectangles.size() > 1) lineButton.setEnabled(true);
             repaint();
         }
     }
